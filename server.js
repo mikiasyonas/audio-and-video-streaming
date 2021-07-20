@@ -10,11 +10,9 @@ const wavDecoder = require('wav-decoder');
 app.get('/', (req, res) => {
     res.redirect('audio');
 })
-app.use('/audio', express.static(path.join(__dirname, 'public')))
+app.use('/audio', express.static(path.join(__dirname, 'public/audio')));
 
-app.get('/video', function (req, res) {
-    res.sendFile(path.join(__dirname + '/public/video.htm'))
-  });
+app.use('/video', express.static(path.join(__dirname, '/public/video')));
 
 
 app.get('/videos', function (req, res) {
@@ -112,6 +110,20 @@ io.on('connection', (socket) => {
         date = data.date;
         console.log(`Sample Rate: ${sampleRate}`)
     })
+
+    socket.on('videoStarted', data => {
+      console.log('got the data');
+      let startTime = data.date;
+      let filename = path.join(__dirname, `public/wav/VC${ startTime }.txt`);
+
+      fs.writeFile(filename, '', (e) => {
+        if(e) {
+          console.log(e)
+        } else {
+          console.log(`saved start time ${ filename }`);
+        }
+      });
+    });
 
     socket.on('send_pcm', (data) => {
         // data: { "1": 11, "2": 29, "3": 33, ... }
